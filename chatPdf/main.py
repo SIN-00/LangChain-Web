@@ -1,9 +1,16 @@
+from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_chroma import Chroma
+from langchain_openai import OpenAIEmbeddings
 
+load_dotenv()
+
+#Loader
 loader = PyPDFLoader("economic.pdf")
 pages = loader.load_and_split()
 
+#Split
 text_splitter = RecursiveCharacterTextSplitter(
     # Set a really small chunk size, just to show.
     chunk_size=100,
@@ -13,4 +20,8 @@ text_splitter = RecursiveCharacterTextSplitter(
 )
 texts = text_splitter.split_documents(pages)
 
-print(texts[0])
+#Embedding
+
+embeddings_model = OpenAIEmbeddings()
+# load it into Chroma
+db = Chroma.from_documents(texts, embeddings_model)
