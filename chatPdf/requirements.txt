@@ -3,3 +3,4 @@ openai
 pypdf
 langchain-text-splitters
 langchain-openai
+tiktoken
