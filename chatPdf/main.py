@@ -6,7 +6,25 @@ from langchain_openai import OpenAIEmbeddings
 from langchain.retrievers.multi_query import MultiQueryRetriever
 from langchain_openai import ChatOpenAI
 
+import streamlit as st
+
 load_dotenv()
+
+#제목
+st.title("ChatPDF")
+st.write("---")
+
+#파일 업로드
+import pandas as pd
+from io import StringIO
+
+uploaded_file = st.file_uploader("Choose a file")
+st.write("---")
+#업로드 되면 동작하는 코드
+if uploaded_file is not None:
+    
+    
+
 
 #Loader
 loader = PyPDFLoader("chatPdf/economic.pdf")
@@ -30,20 +48,21 @@ db = Chroma.from_documents(texts, embeddings_model)
 
 # chat
 
-question = "어떤 용어를 설명중이야?"
+question = "몇페이지에서 어떤 용어를 설명중이야?"
 llm = ChatOpenAI(temperature=0)
 retriever_from_llm = MultiQueryRetriever.from_llm(
     retriever=db.as_retriever(), llm=llm
 )
 
 from langchain.chains import RetrievalQA
-from langchain.chat_models import ChatOpenAI
+from langchain_community.chat_models import ChatOpenAI
 
 # QA 체인 구성
 qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
-    retriever=db.as_retriever(),  # or db.as_retriever()
-    return_source_documents=True   # (선택) 출처 문서 포함 여부
+    retriever=retriever_from_llm,
+    return_source_documents=True  # ✅ 변경
 )
-result = qa_chain.run(question)
-print(result)
+
+response = qa_chain.invoke({"query": question})
+print("📌 답변:", response["result"])
